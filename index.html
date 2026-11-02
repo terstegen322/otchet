@@ -15,16 +15,17 @@
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font:16px/1.4 system-ui, sans-serif; padding:12px 16px 120px; }
   h1 { font-size:20px; margin:8px 0 12px; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 6px; font-weight:600; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
   label.row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; }
-  input[type=number], input[type=text], textarea {
-    width:100%; font:inherit; color:var(--text); background:var(--bg);
-    border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+  input[type=number], input[type=text], input[type=date], textarea {
+    font:inherit; color:var(--text); background:var(--bg);
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; width:100%;
   }
   textarea { min-height:84px; resize:vertical; }
   .num { width:130px !important; text-align:right; }
   .tg { display:flex; gap:6px; }
-  .tg button { flex:1; font:inherit; padding:8px 14px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
+  .tg button { font:inherit; padding:8px 16px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
   .tg button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
   .tgrow { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; }
   .hint { color:var(--muted); font-size:13px; margin:4px 0 0; }
@@ -32,11 +33,14 @@
   .chips { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
   .chips label { border:1px solid var(--line); border-radius:20px; padding:6px 12px; background:var(--bg); }
   .chips input { margin-right:6px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px; }
+  .grid label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); }
+  .grid input { color:var(--text); font-size:16px; }
   pre#out { white-space:pre-wrap; word-break:break-word; margin:0; font:inherit; }
   .bar { position:fixed; left:0; right:0; bottom:0; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:var(--card); border-top:1px solid var(--line); display:flex; gap:10px; }
   .bar button { flex:1; font:600 16px system-ui; padding:14px; border-radius:12px; border:0; background:var(--accent); color:#fff; }
   .bar button.sec { background:var(--bg); color:var(--text); border:1px solid var(--line); flex:0 0 auto; }
-  .err { color:#d1242f; margin:6px 0; }
+  .err { color:#d1242f; margin:6px 0 0; }
   .ok { color:var(--ok); }
   .btnline { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
   .btnline button, .btnline label.btn { font:inherit; padding:8px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
@@ -45,16 +49,9 @@
 <body>
 <h1>📝 Отчёт дня</h1>
 
-<div class="card" id="srcCard">
-  <div id="status" class="hint">Данные FatSecret не загружены. Нажмите «Поделиться» в FatSecret и выберите это приложение, либо загрузите файл вручную.</div>
-  <div class="btnline">
-    <label class="btn">📂 Выбрать CSV<input id="file" type="file" accept=".csv,.CSV,text/*" hidden></label>
-    <button id="pasteBtn" type="button">📋 Вставить текст</button>
-  </div>
-  <div id="err" class="err"></div>
-</div>
-
 <div class="card">
+  <h2>День</h2>
+  <label class="row"><span>Дата</span><input id="date" type="date" style="width:auto"></label>
   <div class="tgrow"><span>Английский</span><div class="tg" data-k="english"><button data-v="1" class="on">✅</button><button data-v="0">❌</button></div></div>
   <label class="row"><span>Шаги</span><input id="steps" class="num" type="number" inputmode="numeric" placeholder="0"></label>
   <div class="tgrow"><span>Тренировка</span><div class="tg" data-k="workout"><button data-v="1" class="on">✅</button><button data-v="0">❌</button></div></div>
@@ -65,17 +62,33 @@
 </div>
 
 <div class="card">
+  <h2>Питание</h2>
+  <label class="row"><span>Калории, ккал</span><input id="cal" class="num" type="text" inputmode="decimal" placeholder="0"></label>
+  <div class="grid" id="nutGrid"></div>
+  <p class="hint">Пустые поля в пост не попадают. Набор показателей меняется в «Настройках».</p>
+  <div class="btnline">
+    <label class="btn">📂 Заполнить из CSV<input id="file" type="file" accept=".csv,.CSV,text/*" hidden></label>
+    <button id="pasteBtn" type="button">📋 Из буфера</button>
+  </div>
+  <div id="status" class="hint"></div>
+  <div id="err" class="err"></div>
+</div>
+
+<div class="card">
   <details>
     <summary>⚙️ Настройки</summary>
     <label class="row"><span>Цель по калориям</span><input id="calGoal" class="num" type="number" inputmode="numeric"></label>
     <label class="row"><span>Цель по шагам</span><input id="stepsGoal" class="num" type="number" inputmode="numeric"></label>
-    <label class="row"><span>Номер дня (необязательно)</span><input id="dayNum" class="num" type="number" inputmode="numeric" placeholder="—"></label>
+    <label class="row"><span>Номер дня</span><input id="dayNum" class="num" type="number" inputmode="numeric" placeholder="—"></label>
+    <p class="hint">Номер дня сам увеличивается на 1 каждый новый день. Очистите поле, чтобы не показывать.</p>
+    <div class="hint" style="margin-top:10px">Показатели питания:</div>
     <div class="chips" id="chips"></div>
-    <label class="row"><span>Калории по приёмам пищи</span><input id="meals" type="checkbox"></label>
+    <label class="row"><span>Калории по приёмам пищи (из CSV)</span><input id="meals" type="checkbox"></label>
+    <div class="btnline"><button id="resetBtn" type="button">🗑 Очистить день</button></div>
   </details>
 </div>
 
-<div class="card"><pre id="out">Здесь появится пост…</pre></div>
+<div class="card"><h2>Пост</h2><pre id="out"></pre></div>
 
 <div class="bar">
   <button class="sec" id="shareBtn" type="button">↗︎</button>
@@ -90,127 +103,197 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   };
+  const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-  const state = { diary: null, english: 1, workout: 1 };
+  const state = { english: 1, workout: 1, meals: [] };
+  let vals = {};          // значения показателей: key -> строка
 
-  // настройки
+  // ---------- вспомогательное ----------
+  const pad = n => String(n).padStart(2, '0');
+  function todayStr() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+  function numOrNull(s) {
+    s = String(s == null ? '' : s).trim().replace(',', '.');
+    if (s === '') return null;
+    const v = parseFloat(s);
+    return isNaN(v) ? null : v;
+  }
+
+  // ---------- настройки ----------
   $('calGoal').value = LS.get('calGoal', 2000);
   $('stepsGoal').value = LS.get('stepsGoal', 10000);
   $('meals').checked = LS.get('meals', false);
-  const selected = LS.get('nutrients', Diary.NUTRIENTS.filter(n => n.def).map(n => n.key));
+  let selected = LS.get('nutrients', Diary.NUTRIENTS.filter(n => n.def).map(n => n.key));
+
   Diary.NUTRIENTS.forEach(n => {
     const l = document.createElement('label');
     l.innerHTML = '<input type="checkbox" value="' + n.key + '"' + (selected.includes(n.key) ? ' checked' : '') + '>' + n.label;
     $('chips').appendChild(l);
   });
 
-  function nutrients() {
-    return [...document.querySelectorAll('#chips input:checked')].map(i => i.value);
+  function renderNutFields() {
+    const g = $('nutGrid');
+    g.innerHTML = '';
+    Diary.NUTRIENTS.filter(n => selected.includes(n.key)).forEach(n => {
+      const l = document.createElement('label');
+      l.innerHTML = n.label + ', ' + n.unit + '<input type="text" inputmode="decimal" data-k="' + n.key + '" placeholder="0">';
+      const inp = l.querySelector('input');
+      inp.value = vals[n.key] != null ? vals[n.key] : '';
+      inp.addEventListener('input', () => { vals[n.key] = inp.value; update(); });
+      g.appendChild(l);
+    });
   }
 
-  // переключатели ✅/❌
-  document.querySelectorAll('.tg').forEach(g => {
-    g.addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
-      g.querySelectorAll('button').forEach(x => x.classList.remove('on'));
-      b.classList.add('on');
-      state[g.dataset.k] = +b.dataset.v;
-      if (g.dataset.k === 'workout') $('exWrap').style.display = state.workout ? '' : 'none';
-      render();
-    });
-  });
+  // ---------- сбор данных и пост ----------
+  function currentDiary() {
+    const ds = $('date').value || todayStr();
+    const [y, m, d] = ds.split('-').map(Number);
+    const dt = new Date(y, m - 1, d, 12);
+    const date = { weekday: dt.toLocaleDateString('ru-RU', { weekday: 'long' }), month: MONTHS[m - 1], day: d, year: y };
+    const totals = { cal: numOrNull($('cal').value) };
+    Diary.NUTRIENTS.forEach(n => { totals[n.key] = numOrNull(vals[n.key]); });
+    return { date, totals, meals: state.meals };
+  }
 
-  function dateKey(d) { return d ? `${d.year}-${d.month}-${d.day}` : ''; }
-
-  function render() {
-    if (!state.diary) { $('out').textContent = 'Здесь появится пост…'; return; }
-    const post = Diary.buildPost({
-      diary: state.diary,
+  function buildNow() {
+    return Diary.buildPost({
+      diary: currentDiary(),
       english: state.english,
       steps: +$('steps').value || 0,
       stepsGoal: +$('stepsGoal').value || 10000,
       workout: state.workout,
       exercises: $('ex').value,
       calGoal: +$('calGoal').value || 2000,
-      nutrients: nutrients(),
+      nutrients: selected,
       showMeals: $('meals').checked,
       dayNumber: $('dayNum').value,
     });
-    $('out').textContent = post;
+  }
+
+  function saveDraft() {
+    LS.set('draft', {
+      date: $('date').value, english: state.english, workout: state.workout,
+      steps: $('steps').value, ex: $('ex').value, cal: $('cal').value, vals, meals: state.meals,
+    });
+  }
+
+  function update() {
+    $('out').textContent = buildNow();
     LS.set('calGoal', +$('calGoal').value || 2000);
     LS.set('stepsGoal', +$('stepsGoal').value || 10000);
     LS.set('meals', $('meals').checked);
-    LS.set('nutrients', nutrients());
+    LS.set('nutrients', selected);
+    saveDraft();
   }
 
-  function load(text) {
-    $('err').textContent = '';
-    try {
-      state.diary = Diary.parseDiary(text);
-    } catch (e) {
-      state.diary = null;
-      $('err').textContent = e.message;
-      render();
-      return;
-    }
-    const d = state.diary.date;
-    $('status').innerHTML = '<span class="ok">✔ Загружено:</span> ' + (d ? `${d.weekday}, ${d.day} ${d.month}` : 'без даты') + ', ' + Math.round(state.diary.totals.cal) + ' ккал';
-
-    // номер дня: +1, если дата новая
+  // ---------- номер дня ----------
+  function suggestDay() {
     const saved = LS.get('day', null);
-    if (saved && saved.num) {
-      $('dayNum').value = saved.key === dateKey(d) ? saved.num : saved.num + 1;
-    }
-    render();
+    if (!saved || !saved.num) return;
+    const today = $('date').value || todayStr();
+    $('dayNum').value = saved.key === today ? saved.num : saved.num + 1;
+  }
+  function rememberDay() {
+    const n = +$('dayNum').value;
+    if (n) LS.set('day', { num: n, key: $('date').value || todayStr() });
   }
 
-  // события
-  ['steps', 'ex', 'calGoal', 'stepsGoal', 'dayNum', 'meals'].forEach(id => $(id).addEventListener('input', render));
-  $('chips').addEventListener('change', render);
-
-  $('file').addEventListener('change', async e => {
-    const f = e.target.files[0]; if (!f) return;
-    load(await f.text());
+  // ---------- переключатели ----------
+  function setToggle(k, v) {
+    state[k] = v;
+    const g = document.querySelector('.tg[data-k="' + k + '"]');
+    g.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.v === v));
+    if (k === 'workout') $('exWrap').style.display = v ? '' : 'none';
+  }
+  document.querySelectorAll('.tg').forEach(g => {
+    g.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      setToggle(g.dataset.k, +b.dataset.v);
+      update();
+    });
   });
+
+  // ---------- CSV (необязательно) ----------
+  function loadCSV(text) {
+    $('err').textContent = '';
+    let diary;
+    try { diary = Diary.parseDiary(text); }
+    catch (e) { $('err').textContent = e.message; return; }
+    const t = diary.totals;
+    $('cal').value = Math.round(t.cal);
+    Diary.NUTRIENTS.forEach(n => { vals[n.key] = String(Math.round(t[n.key] * 10) / 10); });
+    state.meals = diary.meals;
+    const d = diary.date;
+    if (d) {
+      const mi = MONTHS.indexOf(d.month.toLowerCase());
+      if (mi >= 0) { $('date').value = `${d.year}-${pad(mi + 1)}-${pad(d.day)}`; suggestDay(); }
+    }
+    renderNutFields();
+    $('status').innerHTML = '<span class="ok">✔ Заполнено из CSV</span>' + (d ? ': ' + d.day + ' ' + d.month : '');
+    update();
+  }
+  $('file').addEventListener('change', async e => { const f = e.target.files[0]; if (f) loadCSV(await f.text()); });
   $('pasteBtn').addEventListener('click', async () => {
     let t = '';
     try { t = await navigator.clipboard.readText(); } catch (e) {}
     if (!t) t = prompt('Вставьте содержимое CSV') || '';
-    if (t) load(t);
+    if (t) loadCSV(t);
   });
 
-  function remember() {
-    const n = +$('dayNum').value;
-    if (n && state.diary) LS.set('day', { num: n, key: dateKey(state.diary.date) });
-  }
+  // ---------- события ----------
+  ['steps', 'ex', 'cal', 'calGoal', 'stepsGoal', 'dayNum', 'meals'].forEach(id => $(id).addEventListener('input', update));
+  $('date').addEventListener('input', () => { suggestDay(); update(); });
+  $('chips').addEventListener('change', () => {
+    selected = [...document.querySelectorAll('#chips input:checked')].map(i => i.value);
+    renderNutFields();
+    update();
+  });
+
+  $('resetBtn').addEventListener('click', () => {
+    if (!confirm('Очистить введённое за день?')) return;
+    $('steps').value = ''; $('ex').value = ''; $('cal').value = '';
+    vals = {}; state.meals = [];
+    setToggle('english', 1); setToggle('workout', 1);
+    $('status').textContent = ''; $('err').textContent = '';
+    renderNutFields(); update();
+  });
 
   $('copyBtn').addEventListener('click', async () => {
     const text = $('out').textContent;
-    if (!state.diary) return;
     try { await navigator.clipboard.writeText(text); }
     catch (e) {
       const r = document.createRange(); r.selectNodeContents($('out'));
       const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy');
     }
-    remember();
-    const b = $('copyBtn'); const old = b.textContent;
+    rememberDay();
+    const b = $('copyBtn'), old = b.textContent;
     b.textContent = 'Скопировано ✔'; setTimeout(() => b.textContent = old, 1500);
   });
-
   $('shareBtn').addEventListener('click', () => {
-    if (!state.diary) return;
-    remember();
-    if (navigator.share) navigator.share({ text: $('out').textContent }).catch(() => {});
-    else window.open('https://t.me/share/url?url=%20&text=' + encodeURIComponent($('out').textContent));
+    rememberDay();
+    const text = $('out').textContent;
+    if (navigator.share) navigator.share({ text }).catch(() => {});
+    else window.open('https://t.me/share/url?url=%20&text=' + encodeURIComponent(text));
   });
 
-  // файл, пришедший через «Поделиться»
+  // ---------- запуск ----------
+  $('date').value = todayStr();
+  const draft = LS.get('draft', null);
+  if (draft && draft.date === $('date').value) {
+    setToggle('english', draft.english); setToggle('workout', draft.workout);
+    $('steps').value = draft.steps || ''; $('ex').value = draft.ex || ''; $('cal').value = draft.cal || '';
+    vals = draft.vals || {}; state.meals = draft.meals || [];
+  }
+  suggestDay();
+  renderNutFields();
+  update();
+
+  // файл, пришедший через «Поделиться» (если установлено как приложение)
   (async function () {
     if (!/[?&]shared=1/.test(location.search)) return;
     try {
       const c = await caches.open('shared');
       const r = await c.match('shared-csv');
-      if (r) { const t = await r.text(); await c.delete('shared-csv'); if (t) load(t); }
+      if (r) { const t = await r.text(); await c.delete('shared-csv'); if (t) loadCSV(t); }
     } catch (e) {}
     history.replaceState(null, '', location.pathname);
   })();

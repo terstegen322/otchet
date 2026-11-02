@@ -121,16 +121,22 @@
       }
     }
 
-    const over = Math.round(t.cal) - o.calGoal;
-    let cl = `Калории ${Math.round(t.cal)}/${Math.round(o.calGoal)} ${over <= 0 ? OK : NO}`;
-    if (over > 0) cl += ` (+${over})`;
-    L.push(cl);
+    const hasCal = t.cal != null && !isNaN(t.cal);
+    if (hasCal) {
+      const over = Math.round(t.cal) - o.calGoal;
+      let cl = `Калории ${Math.round(t.cal)}/${Math.round(o.calGoal)} ${over <= 0 ? OK : NO}`;
+      if (over > 0) cl += ` (+${over})`;
+      L.push(cl);
+    }
 
-    if (o.showMeals && o.diary.meals.length) {
+    if (o.showMeals && o.diary.meals && o.diary.meals.length) {
       L.push(`${BULLET} ` + o.diary.meals.map(m => `${m.name} ${fmt(m.cal)}`).join(' · '));
     }
     for (const n of NUTRIENTS) {
-      if (o.nutrients.includes(n.key)) L.push(`${BULLET} ${n.label} ${fmt(t[n.key])} ${n.unit}`);
+      // порядок как в списке NUTRIENTS; пустые значения пропускаются
+      if (o.nutrients.includes(n.key) && t[n.key] != null && !isNaN(t[n.key])) {
+        L.push(`${BULLET} ${n.label} ${fmt(t[n.key])} ${n.unit}`);
+      }
     }
     return L.join('\n');
   }
